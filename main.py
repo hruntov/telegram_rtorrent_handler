@@ -25,7 +25,14 @@ os.makedirs(DOWNLOADS_FOLDER, exist_ok=True)
 
 
 @router.message(Command(commands=['start', 'help']))
-async def send_welcome(message: types.Message):
+async def send_welcome(message: types.Message) -> None:
+    """
+    Sends a welcome message to the user when they send the /start or /help command.
+
+    Args:
+        message (types.Message): The message containing the command.
+
+    """
     await message.reply("Привіт! Надішліть мені файл, і я збережу його.")
 
 
@@ -86,7 +93,12 @@ async def get_authorize(message: types.Message) -> bool:
     return False
 
 
-async def main():
+async def main() -> None:
+    """
+    The main function to start the bot.
+    This function includes the router in the dispatcher and starts polling for updates.
+
+    """
     dp.include_router(router)
     await dp.start_polling(bot)
 
