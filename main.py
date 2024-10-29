@@ -6,6 +6,9 @@ from aiogram.filters import Command
 from aiogram import Router
 from aiogram.types import ContentType
 
+from logger import activity_logger, error_logger
+
+
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -45,11 +48,15 @@ async def handle_document(message: types.Message) -> None:
         message (types.Message): The message containing the document.
 
     """
-    if await get_authorize(message):
-        file_info = await bot.get_file(message.document.file_id)
-        file_path = file_info.file_path
-        file_name = message.document.file_name
-        await download_file(message, file_path, file_name)
+    try:
+        if await get_authorize(message):
+            file_info = await bot.get_file(message.document.file_id)
+            file_path = file_info.file_path
+            file_name = message.document.file_name
+            await download_file(message, file_path, file_name)
+    except Exception as e:
+        error_logger.error(f"Error handling document: {e}")
+        await message.reply("Сталася помилка при обробці файлу.")
 
 
 async def download_file(message: types.Message, file_path: str, file_name: str):
@@ -62,13 +69,20 @@ async def download_file(message: types.Message, file_path: str, file_name: str):
         file_name (str): The name of the file.
 
     """
-    downloaded_file = await bot.download_file(file_path)
-    save_path = os.path.join(DOWNLOADS_FOLDER, file_name)
+    try:
+        downloaded_file = await bot.download_file(file_path)
+        save_path = os.path.join(DOWNLOADS_FOLDER, file_name)
 
-    with open(save_path, "wb") as file:
-        file.write(downloaded_file.read())
-
-    await message.reply(f"Файл збережено як '{file_name}' в папці '{DOWNLOADS_FOLDER}'.")
+        with open(save_path, "wb") as file:
+            file.write(downloaded_file.read())
+        activity_logger.info(
+            f"File '{file_name}'saved in the '{DOWNLOADS_FOLDER}' directory "
+            f"by user {message.from_user.username}."
+        )
+        await message.reply(f"Файл збережено як '{file_name}' в папці '{DOWNLOADS_FOLDER}'.")
+    except Exception as e:
+        error_logger.error(f"Error downloading file: {e}")
+        await message.reply("Сталася помилка при завантаженні файлу.")
 
 
 async def get_authorize(message: types.Message) -> bool:
@@ -89,6 +103,7 @@ async def get_authorize(message: types.Message) -> bool:
     if user_id in ALLOWED_USERS_IDS or username in ALLOWED_USERS_USERNAMES:
         return True
 
+    error_logger.error(f"Authorization failed for user {username}")
     await message.reply("Ви не маєте дозволу надсилати файли.")
     return False
 
