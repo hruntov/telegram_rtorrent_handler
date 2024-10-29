@@ -42,14 +42,26 @@ async def handle_document(message: types.Message) -> None:
         file_info = await bot.get_file(message.document.file_id)
         file_path = file_info.file_path
         file_name = message.document.file_name
+        await download_file(message, file_path, file_name)
 
-        downloaded_file = await bot.download_file(file_path)
-        save_path = os.path.join(DOWNLOADS_FOLDER, file_name)
 
-        with open(save_path, "wb") as file:
-            file.write(downloaded_file.read())
+async def download_file(message: types.Message, file_path: str, file_name: str):
+    """
+    Downloads the file from the message and saves it to the specified folder.
 
-        await message.reply(f"Файл збережено як '{file_name}' в папці '{DOWNLOADS_FOLDER}'.")
+    Args:
+        message (types.Message): The message containing the document.
+        file_path (str): The path of the file to download.
+        file_name (str): The name of the file.
+
+    """
+    downloaded_file = await bot.download_file(file_path)
+    save_path = os.path.join(DOWNLOADS_FOLDER, file_name)
+
+    with open(save_path, "wb") as file:
+        file.write(downloaded_file.read())
+
+    await message.reply(f"Файл збережено як '{file_name}' в папці '{DOWNLOADS_FOLDER}'.")
 
 
 async def get_authorize(message: types.Message) -> bool:
