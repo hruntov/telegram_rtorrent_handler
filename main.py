@@ -2,7 +2,7 @@ import os
 import asyncio
 import configparser
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram import Router
 from aiogram.types import ContentType
 from aiogram.types import FSInputFile, ReplyKeyboardMarkup, KeyboardButton
@@ -31,10 +31,23 @@ router = Router()
 os.makedirs(DOWNLOADS_FOLDER, exist_ok=True)
 
 
+@router.my_chat_member()
+async def on_user_join(event: types.ChatMemberUpdated) -> None:
+    """Handler for new users joining."""
+    await event.chat.send_message(
+        "Привіт! Надішліть мені файл, і я збережу його.",
+        reply_markup=get_main_keyboard()
+    )
+
+
 def get_main_keyboard() -> ReplyKeyboardMarkup:
     """Creates main keyboard with screenshot button."""
     keyboard = ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text=SCREENSHOT_BUTTON)]],
+        keyboard=[
+            [
+                KeyboardButton(text=SCREENSHOT_BUTTON)
+            ]
+        ],
         resize_keyboard=True
      )
     return keyboard
@@ -51,6 +64,12 @@ async def send_welcome(message: types.Message) -> None:
     """
     await message.reply("Привіт! Надішліть мені файл, і я збережу його.",
                         reply_markup=get_main_keyboard())
+
+
+@router.message(Command(commands=['screen']))
+async def handle_screen_command(message: types.Message) -> None:
+    """Handle /screen command to get RTorrent screenshot."""
+    await handle_screenshot(message)
 
 
 @router.message(lambda message: message.text == SCREENSHOT_BUTTON)
@@ -163,8 +182,12 @@ async def main() -> None:
     This function includes the router in the dispatcher and starts polling for updates.
 
     """
+    await bot.set_my_commands([
+        types.BotCommand(command="screen", description="Отримати скріншот RTorrent")
+    ])
+
     dp.include_router(router)
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=["message", "my_chat_member"])
 
 if __name__ == "__main__":
     asyncio.run(main())
