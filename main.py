@@ -74,8 +74,11 @@ async def handle_screenshot(message: types.Message) -> None:
         subprocess.run(['script', '-c', f'screen -r rtorrent -X hardcopy {screenshot_path}',
                         screenshot_path
                         ])
-        document = FSInputFile(screenshot_path)
-        await message.reply_document(document, caption="RTorrent screen content")
+
+        with open(screenshot_path, 'r') as file:
+            content = file.read()
+
+        await message.reply(f"```\n{content}\n```", parse_mode="MarkdownV2")
 
         activity_logger.info(f"RTorrent screen content sent to user {message.from_user.username}")
         os.remove(screenshot_path)
