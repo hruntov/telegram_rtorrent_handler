@@ -14,7 +14,7 @@ from logger import activity_logger, error_logger
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-SCREENSHOT_BUTTON = "📸 RTorrent Screenshot"
+SCREENSHOT_BUTTON = "📸 Зробити знімок екрана"
 
 TELEGRAM_BOT_TOKEN = config['telegram']['bot_token']
 TELEGRAM_TIMEOUT = int(config['telegram']['timeout'])
