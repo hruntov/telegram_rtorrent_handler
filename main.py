@@ -1,12 +1,11 @@
-import os
 import asyncio
 import configparser
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command, CommandStart
-from aiogram import Router
-from aiogram.types import ContentType
-from aiogram.types import FSInputFile, ReplyKeyboardMarkup, KeyboardButton
+import os
 import subprocess
+
+from aiogram import Bot, Dispatcher, Router, types
+from aiogram.filters import Command, CommandStart
+from aiogram.types import ContentType, KeyboardButton, ReplyKeyboardMarkup
 
 from logger import activity_logger, error_logger
 
