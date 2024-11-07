@@ -82,6 +82,8 @@ async def handle_screenshot(message: types.Message) -> None:
             information.
 
     """
+    if not await get_authorize(message):
+        return
     try:
         result = subprocess.run(['screen', '-ls'], capture_output=True, text=True)
 
