@@ -5,12 +5,16 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram import Router
 from aiogram.types import ContentType
+from aiogram.types import FSInputFile, ReplyKeyboardMarkup, KeyboardButton
+import subprocess
 
 from logger import activity_logger, error_logger
 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
+SCREENSHOT_BUTTON = "📸 RTorrent Screenshot"
 
 TELEGRAM_BOT_TOKEN = config['telegram']['bot_token']
 TELEGRAM_TIMEOUT = int(config['telegram']['timeout'])
@@ -27,6 +31,15 @@ router = Router()
 os.makedirs(DOWNLOADS_FOLDER, exist_ok=True)
 
 
+def get_main_keyboard() -> ReplyKeyboardMarkup:
+    """Creates main keyboard with screenshot button."""
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=SCREENSHOT_BUTTON)]],
+        resize_keyboard=True
+     )
+    return keyboard
+
+
 @router.message(Command(commands=['start', 'help']))
 async def send_welcome(message: types.Message) -> None:
     """
@@ -36,7 +49,40 @@ async def send_welcome(message: types.Message) -> None:
         message (types.Message): The message containing the command.
 
     """
-    await message.reply("Привіт! Надішліть мені файл, і я збережу його.")
+    await message.reply("Привіт! Надішліть мені файл, і я збережу його.",
+                        reply_markup=get_main_keyboard())
+
+
+@router.message(lambda message: message.text == SCREENSHOT_BUTTON)
+async def handle_screenshot(message: types.Message) -> None:
+    """
+    Captures and sends the content of an RTorrent screen session.
+
+    Args:
+        message (types.Message): The incoming message object from Telegram containing user and chat
+            information.
+
+    """
+    try:
+        result = subprocess.run(['screen', '-ls'], capture_output=True, text=True)
+
+        if 'rtorrent' not in result.stdout:
+            await message.reply('RTorrent screen session not found.')
+            return
+
+        screenshot_path = os.path.join(DOWNLOADS_FOLDER, 'rtorrent_screen.txt')
+        subprocess.run(['script', '-c', f'screen -r rtorrent -X hardcopy {screenshot_path}',
+                        screenshot_path
+                        ])
+        document = FSInputFile(screenshot_path)
+        await message.reply_document(document, caption="RTorrent screen content")
+
+        activity_logger.info(f"RTorrent screen content sent to user {message.from_user.username}")
+        os.remove(screenshot_path)
+
+    except Exception as e:
+        error_logger.error(f"Screen capture error: {e}")
+        await message.reply("Failed to capture RTorrent screen")
 
 
 @router.message(lambda message: message.content_type == ContentType.DOCUMENT)
