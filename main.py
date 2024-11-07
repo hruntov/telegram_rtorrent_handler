@@ -76,7 +76,7 @@ async def handle_screenshot(message: types.Message) -> None:
                         ])
 
         with open(screenshot_path, 'r') as file:
-            content = file.read()
+            content = '\n'.join([line for line in file.readlines() if line.strip()])
 
         await message.reply(f"```\n{content}\n```", parse_mode="MarkdownV2")
 
