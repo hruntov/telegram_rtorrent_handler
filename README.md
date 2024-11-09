@@ -1,6 +1,12 @@
 # Telegram Bot for RTorrent
 
-A Telegram bot that handles file uploads and takes screenshots of RTorrent window.
+A Telegram bot that handles file uploads to different folders and takes screenshots of RTorrent session.
+
+## Features
+- Upload files to specific folders (Movies, Series, Other)
+- Take screenshots of RTorrent screen session
+- User authorization
+- Custom keyboard interface
 
 ## Configuration
 
@@ -18,5 +24,39 @@ allowed_users_ids = 123456789, 987654321
 allowed_users_usernames = @username1, @username2
 
 [paths]
-# Folder where files will be downloaded
-downloads_folder = D:\Downloads\telegram_files
+# Folders for different types of content
+downloads_folder_for_other = /path/to/watch/folder
+downloads_folder_for_movies = /path/to/movies/folder
+downloads_folder_for_series = /path/to/series/folder
+
+### Prerequisites
+- Python 3.8 or higher
+- Poetry (Python package manager)
+- Screen utility for RTorrent
+
+### Installation Steps
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/telegram_rtorrent_handler.git
+    cd telegram_rtorrent_handler
+    ```
+
+2. Install dependencies using Poetry:
+    ```bash
+    poetry install
+    ```
+
+3. Create and configure `config.ini` using the template above:
+    ```ini
+    [telegram]
+    bot_token = YOUR_BOT_TOKEN_HERE
+    timeout = 50
+    allowed_users_ids = 123456789, 987654321
+    allowed_users_usernames = @username1, @username2
+    ```
+
+4. Run the bot:
+    ```bash
+    poetry run python main.py
+    ```
