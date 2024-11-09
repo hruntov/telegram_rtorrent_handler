@@ -17,7 +17,7 @@ SCREENSHOT_BUTTON = "📸 Зробити знімок екрана"
 
 TELEGRAM_BOT_TOKEN = config['telegram']['bot_token']
 TELEGRAM_TIMEOUT = int(config['telegram']['timeout'])
-DOWNLOADS_FOLDER = config['paths']['downloads_folder']
+DOWNLOADS_FOLDER_FOR_OTHER = config['paths']['downloads_folder_for_other']
 DOWNLOADS_FOLDER_FOR_MOVIES = config['paths']['downloads_folder_for_movies']
 DOWNLOADS_FOLDER_FOR_SERIES = config['paths']['downloads_folder_for_series']
 ALLOWED_USERS_IDS = [
@@ -35,7 +35,7 @@ router = Router()
 
 os.makedirs(DOWNLOADS_FOLDER_FOR_MOVIES, exist_ok=True)
 os.makedirs(DOWNLOADS_FOLDER_FOR_SERIES, exist_ok=True)
-os.makedirs(DOWNLOADS_FOLDER, exist_ok=True)
+os.makedirs(DOWNLOADS_FOLDER_FOR_OTHER, exist_ok=True)
 
 
 @router.my_chat_member()
@@ -111,7 +111,7 @@ async def handle_screenshot(message: types.Message) -> None:
             await message.reply('RTorrent screen session not found.')
             return
 
-        screenshot_path = os.path.join(DOWNLOADS_FOLDER, 'rtorrent_screen.txt')
+        screenshot_path = os.path.join(DOWNLOADS_FOLDER_FOR_OTHER, 'rtorrent_screen.txt')
         subprocess.run(['script', '-c', f'screen -r rtorrent -X hardcopy {screenshot_path}',
                         screenshot_path
                         ])
@@ -180,7 +180,7 @@ async def handle_file_type_selection(message: types.Message) -> None:
         elif message.text == SERIES_BUTTON:
             save_folder = DOWNLOADS_FOLDER_FOR_SERIES
         else:
-            save_folder = DOWNLOADS_FOLDER
+            save_folder = DOWNLOADS_FOLDER_FOR_OTHER
 
         await download_file(
             message,
