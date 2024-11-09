@@ -1,41 +1,23 @@
 import asyncio
-import configparser
 import os
 import subprocess
 
 from aiogram import Bot, Dispatcher, Router, types
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command
 from aiogram.types import ContentType, KeyboardButton, ReplyKeyboardMarkup
 
 from logger import activity_logger, error_logger
-
-
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-SCREENSHOT_BUTTON = "📸 Зробити знімок екрана"
-
-TELEGRAM_BOT_TOKEN = config['telegram']['bot_token']
-TELEGRAM_TIMEOUT = int(config['telegram']['timeout'])
-DOWNLOADS_FOLDER_FOR_OTHER = config['paths']['downloads_folder_for_other']
-DOWNLOADS_FOLDER_FOR_MOVIES = config['paths']['downloads_folder_for_movies']
-DOWNLOADS_FOLDER_FOR_SERIES = config['paths']['downloads_folder_for_series']
-ALLOWED_USERS_IDS = [
-    int(user_id.strip()) for user_id in config['telegram']['allowed_users_ids'].split(',')]
-ALLOWED_USERS_USERNAMES = [
-    username.strip() for username in config['telegram']['allowed_users_usernames'].split(',')]
-
-MOVIE_BUTTON = "🎬 Фільм"
-SERIES_BUTTON = "📺 Серіал"
-OTHER_BUTTON = "📁 Інше"
+from utils import (ALLOWED_USERS_IDS, ALLOWED_USERS_USERNAMES,
+                   DOWNLOADS_FOLDER_FOR_MOVIES, DOWNLOADS_FOLDER_FOR_OTHER,
+                   DOWNLOADS_FOLDER_FOR_SERIES, MOVIE_BUTTON, OTHER_BUTTON,
+                   SCREENSHOT_BUTTON, SERIES_BUTTON, TELEGRAM_BOT_TOKEN,
+                   TELEGRAM_TIMEOUT, config, create_download_folders)
 
 bot = Bot(token=TELEGRAM_BOT_TOKEN, timeout=TELEGRAM_TIMEOUT)
 dp = Dispatcher()
 router = Router()
 
-os.makedirs(DOWNLOADS_FOLDER_FOR_MOVIES, exist_ok=True)
-os.makedirs(DOWNLOADS_FOLDER_FOR_SERIES, exist_ok=True)
-os.makedirs(DOWNLOADS_FOLDER_FOR_OTHER, exist_ok=True)
+create_download_folders(config)
 
 
 @router.my_chat_member()
